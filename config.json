@@ -1,0 +1,13 @@
+{
+	"port": 3030,
+	"db":
+	{
+		"pgYaCloud": {
+            "dbName": "db1",
+            "dbHosts": ["rc1b-r21uoagjy1t7k77h.mdb.yandexcloud.net:6432"],
+            "dbUser": "candidate",
+            "dbPass": "62I8anq3cFq5GYh2u4Lh",
+            "caCert": "/root.crt"
+        }
+	}
+}

@@ -1,0 +1,7 @@
+/.idx
+/node_modules
+root.crt
+/public
+/views
+package*.json
+README.md
