@@ -1,6 +1,6 @@
 /.idx
 /node_modules
-root.crt
+# root.crt
 /public
 /views
 package*.json
