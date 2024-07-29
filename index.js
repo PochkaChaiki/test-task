@@ -1,14 +1,6 @@
 const https = require('node:https');
 const pgYaCloud = require('./pgYaCloud.js');
 
-    // pgYaCloud.pgQueryExecuteJResult("DROP TABLE IF EXISTS heroes;", [], (dbErr, dbRes)=>{
-    //   if (dbErr){
-    //     console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
-    //   } else {
-    //     console.log(JSON.stringify({status: true, message: null}));
-    //   }
-    // })
-
 https.get("https://rickandmortyapi.com/api/character/[1,2,3,4,5,6]", async res =>{
   // --------------- Getting characters from service ---------------------------------
   let data = [];
@@ -71,4 +63,14 @@ https.get("https://rickandmortyapi.com/api/character/[1,2,3,4,5,6]", async res =
     });
   })
 })
+
+
+
+// pgYaCloud.pgQueryExecuteJResult("DROP TABLE IF EXISTS heroes;", [], (dbErr, dbRes)=>{
+//   if (dbErr){
+//     console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
+//   } else {
+//     console.log(JSON.stringify({status: true, message: null}));
+//   }
+// })
 
