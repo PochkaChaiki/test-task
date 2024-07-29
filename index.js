@@ -1,7 +1,7 @@
 const https = require('node:https');
 const pgYaCloud = require('./pgYaCloud.js');
 
-    // await pgYaCloud.pgQueryExecuteJResult("DROP TABLE IF EXISTS heroes;", [], (dbErr, dbRes)=>{
+    // pgYaCloud.pgQueryExecuteJResult("DROP TABLE IF EXISTS heroes;", [], (dbErr, dbRes)=>{
     //   if (dbErr){
     //     console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
     //   } else {
@@ -10,47 +10,64 @@ const pgYaCloud = require('./pgYaCloud.js');
     // })
 
 https.get("https://rickandmortyapi.com/api/character/[1,2,3,4,5,6]", async res =>{
+  // --------------- Getting characters from service ---------------------------------
   let data = [];
-  await res.on('data', chunk => {
+  res.on('data', chunk => {
     data.push(chunk);
   })
 
-  await res.on('end', async()=>{
+  res.on('end', async()=>{
 
-    await pgYaCloud.pgQueryExecuteJResult("CREATE TABLE IF NOT EXISTS heroes (id SERIAL PRIMARY KEY, name TEXT, data jsonb);", [], (dbErr, dbRes)=>{
-      if (dbErr){
-        console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
-      } else {
-        console.log(JSON.stringify({status: true, message: null}));
-      }
-    })
+    // ------------- Creating table ---------------------------------------------------
+    await new Promise((resolve, reject)=>{
+      pgYaCloud.pgQueryExecuteJResult("CREATE TABLE IF NOT EXISTS heroes (id SERIAL PRIMARY KEY, name TEXT, data jsonb);", [], (dbErr, dbRes)=>{
+        if (dbErr){
+          console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
+          reject(dbErr);
+        } else {
+          console.log(JSON.stringify({status: true, message: dbRes}));
+          resolve(dbRes);
+        }
+      })
+    });
 
-    const characters = JSON.parse(Buffer.concat(data).toString())
+    // --- Making string and formating values to pass them to function later ----------
+
+    let characters = JSON.parse(Buffer.concat(data).toString())
     let query = `INSERT INTO heroes (name, data) VALUES `;
     let j = 1;
-    for (let i = 0; i < data.length; i++){
+    for (let i = 0; i < characters.length; i++){
       query += `($${j}, $${j+1}),`;
       j+=2;
     }
-    query += `($${j}, $${j+1})`;
-    console.log(query)
-    console.log(j, data.length)
+    query = query.slice(0, -1);
     let values = [];
     characters.map((obj => values.push(obj.name, obj)));
-    
-    await pgYaCloud.pgQueryExecuteJResult(query, values, (dbErr, dbRes)=>{
-      if (dbErr){
-        console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
-      } else {
-        console.log(JSON.stringify({status: true, message: null}));
-      }
+
+    // ------------- Inserting values to database -------------------------------------
+    await new Promise((resolve, reject)=>{
+      pgYaCloud.pgQueryExecuteJResult(query, values, (dbErr, dbRes)=>{
+        if (dbErr){
+          console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
+          reject(dbErr);
+        } else {
+          console.log(JSON.stringify({status: true, message: null}));
+          resolve(dbRes);
+        }
+      });
     });
-    await pgYaCloud.pgQueryExecuteJResult("SELECT COUNT(*) FROM heroes", [], (dbErr, dbRes)=>{
-      if (dbErr){
-        console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
-      } else {
-        console.log(JSON.stringify({status: true, message: dbRes}));
-      }
+
+    // ------------- Count query to check if inserting works properly --------------------
+    await new Promise((resolve, reject)=>{
+      pgYaCloud.pgQueryExecuteJResult("SELECT COUNT(*) FROM heroes", [], (dbErr, dbRes)=>{
+        if (dbErr){
+          console.log(JSON.stringify({status: false, message: dbErr.where || dbRes}));
+          reject(dbErr);
+        } else {
+          console.log(JSON.stringify({status: true, message: dbRes}));
+          resolve(dbRes);
+        }
+      });
     });
   })
 })
